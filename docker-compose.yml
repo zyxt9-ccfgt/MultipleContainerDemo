@@ -1,0 +1,31 @@
+version: '3.8'
+
+networks:
+  appnetwork:
+
+services:
+  mssql-container:
+    image: mcr.microsoft.com/mssql/server
+    container_name: mssql-container
+    environment:
+     - ACCEPT_EULA=Y # Accept the End-User License Agreement
+     - SA_PASSWORD=localtest@12345 # Set the 'sa' user password
+    ports:
+     - "8002:1433"
+    networks:
+     - appnetwork
+  samplecontainerization.api:
+    container_name: webapi-container
+    image: ${DOCKER_REGISTRY-}samplecontainerizationapi
+    ports:
+     - 8001:80 
+    environment:
+        ASPNETCORE_ENVIRONMENT: Local  
+    build:
+      context: .
+      dockerfile: SampleContainerization.API\Dockerfile
+    depends_on:
+      - mssql-container
+  
+    networks:
+     - appnetwork
